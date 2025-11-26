@@ -127,7 +127,6 @@ def ryasub_graph_search(problem):
     return graph_search(problem, RyAsub(problem))
 
 
-
 # _____________________________________________________________________________
 # The remainder of this file implements examples for the search algorithms.
 
