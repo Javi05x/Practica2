@@ -8,6 +8,7 @@ functions."""
 from utils import *
 import random
 import sys
+import time
 
 
 # ______________________________________________________________________________
@@ -93,20 +94,30 @@ class Node:
 # ______________________________________________________________________________
 ## Uninformed Search algorithms
 
+
 def graph_search(problem, fringe):
     """Search through the successors of a problem to find a goal.
     The argument fringe should be an empty queue.
     If two paths reach a state, only use the best one. [Fig. 3.18]"""
     closed = {}
     fringe.append(Node(problem.initial))
+    nodes_generated = 1
+    nodes_visited = 0
+    start_time = time.time()
     while fringe:
         node = fringe.pop()
+        nodes_visited += 1
         if problem.goal_test(node.state):
-            return node
+            end_time = time.time()
+            return node, nodes_generated, nodes_visited, end_time - start_time
         if node.state not in closed:
             closed[node.state] = True
-            fringe.extend(node.expand(problem))
-    return None
+            successors = node.expand(problem)
+            fringe.extend(successors)
+            nodes_generated += len(successors)
+    end_time = time.time()
+    return None, nodes_generated, nodes_visited, end_time - start_time
+
 
 
 def breadth_first_graph_search(problem):
@@ -120,7 +131,7 @@ def depth_first_graph_search(problem):
 
 def rya_graph_search(problem):
     """Search the deepest nodes in the search tree first. [p 74]"""
-    return graph_search(problem, RyA)
+    return graph_search(problem, RyA())
 
 def ryasub_graph_search(problem):
     """Search the deepest nodes in the search tree first. [p 74]"""

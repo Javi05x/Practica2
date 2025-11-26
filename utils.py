@@ -1,3 +1,4 @@
+import math
 
 #______________________________________________________________________________
 # Simple Data Structures: infinity, Dict, Struct
@@ -568,29 +569,50 @@ class RyA(Queue):
             self.start = 0
         return e
 
-class RyAsub(Queue):
-    """A First-In-First-Out Queue."""
+
+import heapq
+
+class RyAsub:
+    """Priority queue for Ramificación y Acotación con subestimación heurística."""
 
     def __init__(self, problem):
-        self.A = []
-        self.start = 0
+        self.problem = problem
+        self.heap = []
+        self.entry_finder = {}  # Map from node state to entry for quick update
+        self.REMOVED = '<removed-node>'
+        self.counter = 0  # Unique sequence count
 
-    def append(self, item):
-        self.A.append(item)
+    def append(self, node):
+        """Add a new node or update the priority of an existing node."""
+        f = node.path_cost + self.problem.h(node)
+        entry = [f, self.counter, node]
+        self.counter += 1
+        if node.state in self.entry_finder:
+            self.remove_node(node.state)
+        self.entry_finder[node.state] = entry
+        heapq.heappush(self.heap, entry)
 
-    def __len__(self):
-        return len(self.A) - self.start
-
-    def extend(self, items):
-        self.A.extend(items)
+    def remove_node(self, state):
+        """Mark an existing node as REMOVED."""
+        entry = self.entry_finder.pop(state)
+        entry[-1] = self.REMOVED
 
     def pop(self):
-        e = self.A[self.start]
-        self.start += 1
-        if self.start > 5 and self.start > len(self.A) / 2:
-            self.A = self.A[self.start:]
-            self.start = 0
-        return e
+        """Remove and return the lowest f-cost node."""
+        while self.heap:
+            f, count, node = heapq.heappop(self.heap)
+            if node is not self.REMOVED:
+                del self.entry_finder[node.state]
+                return node
+        raise KeyError('pop from an empty priority queue')
+
+    def extend(self, nodes):
+        for node in nodes:
+            self.append(node)
+
+    def __len__(self):
+        return len(self.entry_finder)
+
 
 ## Fig: The idea is we can define things like Fig[3,10] later.
 ## Alas, it is Fig[3,10] not Fig[3.10], because that would be the same as Fig[3.1]

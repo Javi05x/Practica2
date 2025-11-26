@@ -1,44 +1,37 @@
-# Search methods
-
 import search
-
-ab = search.GPSProblem('A', 'B'
-                       , search.romania)
+from visualizacion import graficar_comparacion
 
 
-print(search.rya_graph_search(ab).path())
-print(search.ryasub_graph_search(ab).path())
+pares_ciudades = ['A->B', 'T->M', 'Z->D', 'A->Z']
 
-print(search.breadth_first_graph_search(ab).path())
-print(search.depth_first_graph_search(ab).path())
+nodos_generados = {'RyA': [], 'RyAsub': []}
+nodos_visitados = {'RyA': [], 'RyAsub': []}
+tiempos = {'RyA': [], 'RyAsub': []}
 
-# Result:
-# [<Node B>, <Node P>, <Node R>, <Node S>, <Node A>] : 101 + 97 + 80 + 140 = 418
-# [<Node B>, <Node F>, <Node S>, <Node A>] : 211 + 99 + 140 = 450
-
-print("--------------------------------------------------------------------------")
-ab = search.GPSProblem('T', 'M'
-                       , search.romania)
+pares = [('A', 'B'), ('T', 'M'), ('Z', 'D'), ('A', 'Z')]
 
 
-print(search.rya_graph_search(ab).path())
-print(search.ryasub_graph_search(ab).path())
+def mostrar_resultados(metodo, problema, nombre_metodo):
+    solucion, gen, vis, tiempo = metodo(problema)
+    ruta = [node.state for node in solucion.path()]
+    coste = solucion.path_cost
+    print(f"{nombre_metodo} Path: {ruta}")
+    print(f"Coste total: {coste}")
+    print(f"Nodos generados: {gen}")
+    print(f"Nodos visitados: {vis}")
+    print(f"Tiempo ejecucion: {tiempo:.6f} segundos")
+    print("--------------------------------------------------------------------------")
 
-print("--------------------------------------------------------------------------")
-
-ab = search.GPSProblem('Z', 'D'
-                       , search.romania)
-
-
-print(search.rya_graph_search(ab).path())
-print(search.ryasub_graph_search(ab).path())
-
-print("--------------------------------------------------------------------------")
-
-ab = search.GPSProblem('A', 'Z'
-                       , search.romania)
+    # Acumula los datos para la gráfica
+    nodos_generados[nombre_metodo].append(gen)
+    nodos_visitados[nombre_metodo].append(vis)
+    tiempos[nombre_metodo].append(tiempo)
 
 
-print(search.rya_graph_search(ab).path())
-print(search.ryasub_graph_search(ab).path())
+for inicial, meta in pares:
+    problema = search.GPSProblem(inicial, meta, search.romania)
+    mostrar_resultados(search.rya_graph_search, problema, 'RyA')
+    mostrar_resultados(search.ryasub_graph_search, problema, 'RyAsub')
 
+# Al final muestra la gráfica con todos los resultados
+graficar_comparacion(pares_ciudades, nodos_generados, nodos_visitados, tiempos)
